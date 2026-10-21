@@ -6,12 +6,13 @@ Trener personalny w kieszeni. Aplikacja webowa do treningu na siłowni, w język
 
 - **Profil i BMI**: wiek, waga, wzrost i płeć. BMI liczone na bieżąco wg skali WHO, zakres zdrowej wagi, BMR (Mifflin-St Jeor), zapotrzebowanie kaloryczne i białko.
 - **Cel**: schudnąć, przybrać na wadze albo zwiększyć mięśnie. Dla kobiet dodatkowo partie, na których plan się skupia (brzuch, uda, pośladki, ramiona, plecy).
-- **Plan tygodniowy**: 2–5 treningów, dopasowany do celu i poziomu. Każde ćwiczenie można zamienić na inne.
+- **Siłownia albo dom**: przy treningu w domu zaznaczasz posiadany sprzęt (hantle, kettlebell, gumy, drążek, ławka, TRX, rower i inne), a plan i baza ćwiczeń pokazują tylko to, co da się z nim zrobić. Bez sprzętu też powstaje pełny plan.
+- **Plan tygodniowy**: 2–5 treningów, dopasowany do celu, poziomu i sprzętu. Każde ćwiczenie można zamienić na inne.
 - **Moja dieta**: dziennik żywienia w stylu Fitatu, czyli 5 posiłków dziennie, baza 136 produktów (w tym tofu, tempeh i inne roślinne źródła białka) z kaloriami i makroskładnikami, własne produkty, kopiowanie posiłku z poprzedniego dnia, licznik wody i nawigacja po dniach.
 - **Sposób odżywiania**: jem wszystko, bez mięsa (z rybami), wegetariańska albo wegańska. Wybór filtruje przepisy, produkty i podpowiedzi trenera.
 - **Przepisy**: 40 przepisów z wyliczonymi kaloriami i makro na porcję, ułożonych pod Twój cel kaloryczny. Każdy można dodać do dziennika jednym kliknięciem.
 - **Aktywność**: wpisy z zegarka (czas, kalorie, prędkość, dystans, nachylenie, tętno), podsumowanie 7 dni i wykres kalorii z 14 dni. Bez zegarka kalorie można oszacować metodą MET.
-- **Baza 140 ćwiczeń**: maszyny, wolne ciężary i cardio, z techniką i zamiennikami.
+- **Baza 185 ćwiczeń**: maszyny, wolne ciężary, gumy, ćwiczenia bez sprzętu i cardio, z techniką i zamiennikami.
 - **Trener (chatbot)**: w wersji offline odpowiada na podstawowe pytania (technika, zamienniki, kalorie, białko, regeneracja).
 
 Wszystkie dane (profil, plan, dieta, aktywność, rozmowa z trenerem, ostatnio otwarta zakładka) zapisują się automatycznie w przeglądarce (`localStorage`) i są dostępne po ponownym wejściu. W zakładce Profil możesz pobrać kopię zapasową (.json) i wczytać ją na innym urządzeniu. Nie ma serwera ani kont użytkowników.

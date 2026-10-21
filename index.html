@@ -150,7 +150,8 @@ section.view{display:grid;gap:22px}
 .callout{border-left:4px solid var(--plate-yellow);background:var(--surface);padding:12px 16px;border-radius:0 8px 8px 0;font-size:14px}
 
 /* library */
-.lib-tools{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr);gap:10px}
+.lib-tools{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:10px}
+@media (max-width:960px){.lib-tools{grid-template-columns:1fr 1fr}.lib-tools .search{grid-column:1/-1}}
 @media (max-width:720px){.lib-tools{grid-template-columns:1fr}}
 .lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
 .ex-card{all:unset;box-sizing:border-box;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;display:grid;gap:6px;align-content:start}
@@ -289,6 +290,7 @@ section.view{display:grid;gap:22px}
 .rec-card{gap:8px}
 .rec-k{font-size:15px;font-weight:700}
 .rec-k small{display:block;font-weight:500;color:var(--muted);font-size:12px;margin-top:2px}
+.tag-s.home{background:color-mix(in srgb,var(--plate-blue) 16%,transparent);color:var(--ink)}
 .tag-s.fit{background:var(--accent-soft);color:var(--ink)}
 .cust{display:grid;gap:12px}
 .eat-opts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
@@ -412,6 +414,19 @@ footer{max-width:1100px;margin:0 auto;padding-block:0 40px;font-size:12.5px;colo
     <div><span class="label">Dla kobiet</span><h3 style="margin-top:4px">Na czym się skupić?</h3></div>
     <p class="muted" style="font-size:14px">Wybierz partie, które dostaną dodatkowe ćwiczenia w każdym treningu. Możesz zaznaczyć kilka.</p>
     <div class="chips" id="focus-chips"></div>
+  </div>
+
+  <div class="card" style="display:grid;gap:14px">
+    <div><span class="label">Miejsce treningu</span><h3 style="margin-top:4px">Gdzie trenujesz?</h3></div>
+    <div class="seg" role="group" aria-label="Miejsce treningu" id="seg-place" style="max-width:420px">
+      <button type="button" data-v="silownia" aria-pressed="true">Na siłowni</button>
+      <button type="button" data-v="dom" aria-pressed="false">W domu</button>
+    </div>
+    <div id="equip-wrap" hidden style="display:grid;gap:10px">
+      <p class="muted" style="font-size:14px">Zaznacz sprzęt, który masz w domu. Plan i baza ćwiczeń dopasują się do niego. Bez żadnego sprzętu też ułożymy trening: wystarczy krzesło, stół i ręcznik.</p>
+      <div class="chips" id="equip-chips"></div>
+      <p class="src" id="equip-count"></p>
+    </div>
   </div>
 
   <div class="card" style="display:grid;gap:12px">
@@ -538,12 +553,13 @@ footer{max-width:1100px;margin:0 auto;padding-block:0 40px;font-size:12.5px;colo
 <section class="view" id="v-cwiczenia" hidden>
   <div class="intro">
     <span class="label">Baza ćwiczeń</span>
-    <h2>Każda maszyna na siłowni</h2>
-    <p class="muted">Od suwnicy i Smitha po pendulum squat, belt squat i GHD. Kliknij ćwiczenie, żeby zobaczyć technikę.</p>
+    <h2>Ćwiczenia na siłownię i do domu</h2>
+    <p class="muted">Od suwnicy i Smitha po pendulum squat i GHD, a do tego ćwiczenia z hantlami, gumami i bez sprzętu do zrobienia w domu. Kliknij ćwiczenie, żeby zobaczyć technikę.</p>
   </div>
   <div class="lib-tools">
     <input class="search" id="lib-q" type="search" placeholder="Szukaj: np. suwnica, pośladki, wiosłowanie…" aria-label="Szukaj ćwiczenia">
     <select id="lib-eq" aria-label="Sprzęt"><option value="">Cały sprzęt</option></select>
+    <select id="lib-place" aria-label="Miejsce"><option value="">Siłownia i dom</option><option value="dom">W domu, z moim sprzętem</option><option value="bez">Bez sprzętu</option></select>
     <select id="lib-lvl" aria-label="Poziom"><option value="">Każdy poziom</option><option value="1">Początkujący</option><option value="2">Średni</option><option value="3">Zaawansowany</option></select>
   </div>
   <div class="chips" id="lib-muscles"></div>
@@ -576,7 +592,7 @@ footer{max-width:1100px;margin:0 auto;padding-block:0 40px;font-size:12.5px;colo
 </section>
 </main>
 
-<footer>POSTURAJsie · wersja 0.3 · Obliczenia: BMI wg WHO, przemiana materii wg wzoru Mifflina-St Jeora.</footer>
+<footer>POSTURAJsie · wersja 0.4 · Obliczenia: BMI wg WHO, przemiana materii wg wzoru Mifflina-St Jeora.</footer>
 
 <div class="toast" id="toast" hidden role="status"><span id="toast-txt"></span><button type="button" id="toast-undo" hidden>Cofnij</button></div>
 <div class="overlay" id="overlay" hidden><div class="modal" role="dialog" aria-modal="true" aria-labelledby="m-title" id="modal"></div></div>
@@ -601,7 +617,7 @@ Pompki na poręczach z pochyleniem|Poręcze (dip)|klatka|triceps,barki|2|c|Pochy
 Pompki klasyczne|Masa ciała|klatka|triceps,brzuch|1|c|Ciało w jednej linii, brzuch napięty. Klatka prawie dotyka podłogi.
 Pullover z hantlem na ławce|Hantle + ławka|klatka|plecy|2|i|Ramiona lekko ugięte, opuszczaj hantel za głowę do uczucia rozciągnięcia, nie wyginaj lędźwi.
 Wyciskanie landmine jednorącz|Landmine|klatka|barki,brzuch|2|c|Wypychaj koniec gryfu w górę i do przodu. Przyjazne dla barków.
-Svend press z talerzem|Talerz obciążeniowy|klatka||1|i|Ściśnij talerz dłońmi i wypchnij przed siebie, cały czas mocno go ściskając.
+Svend press (talerz lub hantel)|Talerz obciążeniowy|klatka||1|i|Ściśnij talerz dłońmi i wypchnij przed siebie, cały czas mocno go ściskając.
 Podciąganie na drążku nachwytem|Drążek|plecy|biceps|3|c|Zacznij od ściągnięcia łopatek. Klatka do drążka, opuszczanie pełne i kontrolowane.
 Podciąganie na drążku podchwytem|Drążek|plecy|biceps|2|c|Uchwyt na szerokość barków. Łokcie prowadź w dół wzdłuż tułowia.
 Podciąganie na maszynie z asystą|Maszyna do podciągania z asystą|plecy|biceps|1|c|Im większy ciężar na stosie, tym większa pomoc. Zmniejszaj go co tydzień.
@@ -656,7 +672,7 @@ Pompki na poręczach w pionie|Poręcze (dip)|triceps|klatka,barki|2|c|Tułów pi
 Maszyna do pompek na poręczach (dip machine)|Maszyna dip|triceps|klatka|1|c|Siedząc, wypychaj uchwyty w dół do pełnego wyprostu.
 Kickback z hantlem|Hantle|triceps||1|i|Ramię równoległe do podłogi i nieruchome. Prostuj tylko przedramię.
 Pompki diamentowe|Masa ciała|triceps|klatka|2|c|Dłonie razem pod klatką tworzą romb. Łokcie blisko ciała.
-Pompki w podporze tyłem na ławce|Ławka|triceps||1|i|Dłonie na krawędzi ławki, plecy blisko niej. Zegnij łokcie do 90°.
+Pompki w podporze tyłem na ławce lub krześle|Ławka / krzesło|triceps||1|i|Dłonie na krawędzi ławki lub stabilnego krzesła, plecy blisko niej. Zegnij łokcie do 90°.
 Uginanie nadgarstków ze sztangą|Sztanga|przedramiona||1|i|Przedramiona na udach lub ławce, ruch tylko w nadgarstkach.
 Spacer farmera|Hantle / kettlebell|przedramiona|plecy,brzuch|1|c|Ciężkie hantle w dłoniach, wyprostowana sylwetka, krótkie szybkie kroki.
 Uginanie ramion nachwytem (reverse curl)|Sztanga|przedramiona|biceps|1|i|Nachwyt na gryfie, łokcie przy tułowiu. Wzmacnia prostowniki przedramienia.
@@ -711,10 +727,55 @@ Unoszenie kolan na poręczach (kapitański fotel)|Poręcze / kapitański fotel|b
 Kółko do brzucha (ab wheel)|Kółko do brzucha|brzuch|plecy|2|i|Z klęku rolluj do przodu tylko tak daleko, jak utrzymasz proste lędźwie.
 Pallof press na wyciągu|Brama / wyciąg linkowy|brzuch||1|i|Bokiem do wyciągu, wypychaj uchwyt przed siebie i nie pozwól się obrócić.
 Dead bug|Masa ciała|brzuch||1|i|Leżąc, lędźwie dociśnięte do podłogi. Prostuj przeciwną rękę i nogę naprzemiennie.
-Russian twist z talerzem|Talerz obciążeniowy|brzuch||1|i|Siedząc w odchyleniu, skręcaj tułów, a nie tylko ręce.
+Russian twist z obciążeniem|Talerz obciążeniowy|brzuch||1|i|Siedząc w odchyleniu, skręcaj tułów, a nie tylko ręce.
 Spięcia brzucha na ławce skośnej|Ławka skośna|brzuch||1|i|Zwijaj tułów od głowy, nie wyrzucaj się biodrami.
 Drwal na wyciągu (woodchopper)|Brama / wyciąg linkowy|brzuch||1|i|Ruch skośny z góry w dół przez ciało, obrót z tułowia, biodra stabilne.
 Hollow hold|Masa ciała|brzuch||2|i|Leżąc, unieś łopatki i proste nogi, lędźwie dociśnięte do podłogi. Trzymaj pozycję.
+Przysiad bez obciążenia|Masa ciała|czworoglowe|posladki|1|c|Stopy na szerokość barków, ręce przed sobą. Zejdź jak najniżej z prostymi plecami. Gdy 25 powtórzeń jest łatwe, przejdź na przysiad bułgarski.
+Wykroki w miejscu|Masa ciała|czworoglowe|posladki|1|c|Długi krok, oba kolana zginają się do ok. 90°. Wypychaj się przednią piętą.
+Przysiad bułgarski z nogą na krześle|Masa ciała + krzesło|czworoglowe|posladki|2|c|Tylna stopa na krześle lub kanapie. Najlepsze ćwiczenie na nogi bez obciążenia: schodź powoli, przez 3 sekundy.
+Wejścia na krzesło|Masa ciała + krzesło|czworoglowe|posladki|1|c|Stabilne krzesło oparte o ścianę. Wchodź jedną nogą, nie odbijając się drugą.
+Krzesełko przy ścianie (wall sit)|Masa ciała|czworoglowe||1|i|Plecy przy ścianie, uda równolegle do podłogi. Trzymaj 30–60 sekund.
+Przysiad sumo|Masa ciała|przywodziciele|posladki,czworoglowe|1|c|Szeroko rozstawione stopy, palce na zewnątrz. Kolana idą w linii stóp. Z hantlem lub kettlebell w dłoniach staje się trudniejszy.
+Pompki na kolanach|Masa ciała|klatka|triceps|1|c|Ciało w jednej linii od kolan do głowy. Gdy zrobisz 15 powtórzeń, przejdź na klasyczne pompki.
+Pompki z dłońmi na podwyższeniu|Masa ciała + krzesło|klatka|triceps|1|c|Dłonie na stole, kanapie lub parapecie. Im wyżej, tym łatwiej.
+Pompki z nogami na krześle|Masa ciała + krzesło|klatka|barki,triceps|2|c|Stopy na krześle, ciało proste. Mocniej angażuje górną część klatki.
+Pompki w pozycji szczupaka (pike push-up)|Masa ciała|barki|triceps|2|c|Biodra wysoko, ciało w kształcie odwróconego V. Opuszczaj głowę między dłonie.
+Wiosłowanie pod stołem podchwytem|Masa ciała + stół|biceps|plecy|2|c|Jak wiosłowanie pod stołem, ale dłonie skierowane do siebie. Mocniej pracuje biceps.
+Wiosłowanie z ręcznikiem przy słupku|Masa ciała + ręcznik|plecy|biceps|1|c|Owiń ręcznik wokół solidnej poręczy schodów lub słupka, odchyl się do tyłu i przyciągaj klatkę do rąk. Im bardziej się odchylisz, tym trudniej.
+Y-T-W leżąc na brzuchu|Masa ciała|plecy|barki|1|i|Leżąc na brzuchu, unoś proste ręce kolejno w kształt liter Y, T i W, ściągając łopatki. 8 powtórzeń każdej litery.
+Uginanie ramion z ręcznikiem (izometria)|Masa ciała + ręcznik|biceps||1|i|Stań na środku ręcznika, chwyć końce i ciągnij w górę z łokciami przy tułowiu. Napinaj mocno przez 15–20 sekund.
+Wiosłowanie pod stołem|Masa ciała + stół|plecy|biceps|2|c|Połóż się pod solidnym stołem, chwyć krawędź blatu i podciągaj klatkę do blatu. Najpierw sprawdź, czy stół się nie przewróci.
+Superman|Masa ciała|dolny_grzbiet|posladki,plecy|1|i|Leżąc na brzuchu, unieś jednocześnie ręce i nogi, przytrzymaj 2 sekundy.
+Most biodrowy jednonóż|Masa ciała|posladki|dwuglowe|1|i|Jedna noga w górze, wypchnij biodra drugą. Pauza 2 sekundy na górze.
+Hip thrust z plecami na kanapie|Masa ciała + krzesło|posladki|dwuglowe|1|c|Łopatki na krawędzi kanapy. Pełny wyprost bioder i mocne spięcie pośladków.
+Hip thrust z hantlem na kanapie|Hantle|posladki|dwuglowe|1|c|Hantel na biodrach (podłóż ręcznik), łopatki na kanapie. Pauza na górze.
+Kopnięcia w tył w klęku (donkey kicks)|Masa ciała|posladki||1|i|W klęku podpartym wypychaj zgiętą nogę piętą w sufit, bez wyginania lędźwi.
+Odwodzenie nogi w klęku (fire hydrant)|Masa ciała|odwodziciele|posladki|1|i|W klęku podpartym unoś zgiętą nogę w bok, miednica nieruchoma.
+Muszelka z gumą (clamshell)|Guma mini band|odwodziciele|posladki|1|i|Leżąc na boku z ugiętymi kolanami, otwieraj górne kolano jak muszlę. Stopy cały czas razem.
+Martwy ciąg rumuński na jednej nodze|Masa ciała|dwuglowe|posladki|1|c|Stojąc na jednej nodze, pochylaj tułów z prostymi plecami, drugą nogę prowadząc w tył. Dla równowagi możesz trzymać się krzesła. Z hantlem w dłoni trudniej.
+Ślizgi na ręczniku (uginanie nóg)|Masa ciała + ręcznik|dwuglowe|posladki|2|i|Leżąc na plecach, pięty na ręczniku na gładkiej podłodze. Unieś biodra i przyciągaj pięty do pośladków.
+Wspięcia na palce na schodku|Masa ciała|lydki||1|i|Przednia część stopy na stopniu, pełne opuszczenie pięt i pauza na górze. Gdy będzie za łatwo, rób jednonóż.
+Brzuszki (crunch)|Masa ciała|brzuch||1|i|Odrywaj od podłogi tylko łopatki, nie ciągnij głowy rękami.
+Unoszenie nóg leżąc|Masa ciała|brzuch||1|i|Lędźwie dociśnięte do podłogi, opuszczaj nogi powoli.
+Nożyce|Masa ciała|brzuch||1|i|Leżąc, nogi nisko nad podłogą, krzyżuj je naprzemiennie.
+Wspinaczka górska (mountain climbers)|Masa ciała|cardio|brzuch|1|k|W podporze przyciągaj kolana do klatki naprzemiennie, szybko. 30 s pracy, 30 s przerwy, 8–10 rund.
+Burpees|Masa ciała|cardio|klatka,czworoglowe|2|k|Przysiad, podpór, pompka, powrót i wyskok. 8–10 rund po 30 sekund.
+Pajacyki i skip A (obwód)|Masa ciała|cardio||1|k|Na zmianę 40 s pajacyków i 40 s skipu A, 20 s przerwy. 10–15 minut.
+Negatywy podciągania|Drążek|plecy|biceps|1|c|Z krzesła ustaw się brodą nad drążkiem i opuszczaj się powoli przez 4–5 sekund.
+Wyciskanie hantli leżąc na podłodze (floor press)|Hantle|klatka|triceps|1|c|Bez ławki: łokcie lądują na podłodze, krótka pauza i wypchnięcie.
+Wiosłowanie hantlami w opadzie|Hantle|plecy|biceps|1|c|Tułów pochylony, plecy proste. Ciągnij hantle do bioder.
+Wyciskanie hantli nad głowę stojąc|Hantle|barki|triceps,brzuch|1|c|Brzuch i pośladki napięte, nie odchylaj się do tyłu.
+Wyciskanie z gumą stojąc|Gumy oporowe z uchwytami|klatka|triceps|1|c|Guma zaczepiona za plecami o drzwi (kotwa), wypychaj uchwyty przed siebie.
+Wiosłowanie z gumą|Gumy oporowe z uchwytami|plecy|biceps|1|c|Guma zaczepiona na wysokości klatki (kotwa do drzwi). Przyciągaj uchwyty do brzucha.
+Ściąganie gumy z góry|Gumy oporowe z uchwytami|plecy|biceps|1|c|Guma zaczepiona wysoko na drzwiach. Klęcząc, ściągaj uchwyty do klatki.
+Rozciąganie gumy przed sobą (band pull-apart)|Gumy oporowe z uchwytami|barki|plecy|1|i|Proste ręce przed sobą, rozciągaj gumę do klatki, ściągając łopatki.
+Unoszenie ramion bokiem z gumą|Gumy oporowe z uchwytami|barki||1|i|Stań na gumie, unoś ręce bokiem do wysokości barków.
+Wyciskanie nad głowę z gumą|Gumy oporowe z uchwytami|barki|triceps|1|c|Stań na gumie i wypychaj uchwyty nad głowę.
+Uginanie ramion z gumą|Gumy oporowe z uchwytami|biceps||1|i|Stań na gumie, łokcie przy tułowiu.
+Prostowanie ramion z gumą nad głową|Gumy oporowe z uchwytami|triceps||1|i|Stań na gumie, uchwyt za głową, prostuj łokcie w górę.
+Przysiad z gumą|Gumy oporowe z uchwytami|czworoglowe|posladki|1|c|Stań na gumie, uchwyty na wysokości barków, wykonaj przysiad.
+Martwy ciąg rumuński z gumą|Gumy oporowe z uchwytami|dwuglowe|posladki|1|c|Stań na gumie, biodra w tył, plecy proste.
 Marsz pod górę na bieżni (12-3-30)|Bieżnia|cardio|posladki,lydki|1|k|Nachylenie 12%, prędkość 3–5 km/h, 20–30 minut. Nie trzymaj się poręczy.
 Interwały na bieżni|Bieżnia|cardio||2|k|Np. 30 s szybkiego biegu i 90 s marszu, 8–10 rund.
 Rower stacjonarny|Rower stacjonarny|cardio|czworoglowe|1|k|Tempo, przy którym możesz mówić pełnymi zdaniami, 25–40 minut. Łagodne dla stawów.
@@ -729,11 +790,26 @@ Liny bojowe (battle ropes)|Liny (battle ropes)|cardio|barki|2|k|Lekki przysiad, 
 const MUSCLES = {klatka:"Klatka",plecy:"Plecy",barki:"Barki",biceps:"Biceps",triceps:"Triceps",przedramiona:"Przedramiona",brzuch:"Brzuch",posladki:"Pośladki",czworoglowe:"Uda – przód",dwuglowe:"Uda – tył",przywodziciele:"Uda – wewnętrzna",odwodziciele:"Uda – zewnętrzna",lydki:"Łydki",dolny_grzbiet:"Dolny grzbiet",cardio:"Cardio"};
 const EX = RAW.trim().split("\n").map((l,i)=>{const [n,eq,m,s,lvl,t,tip]=l.split("|");return{id:i,n,eq,m,s:s?s.split(","):[],lvl:+lvl,t,tip}});
 const LVL = {1:"Początkujący",2:"Średni",3:"Zaawansowany"};
+/* sprzęt domowy */
+const HOME_EQ={hantle:"Hantle",kettlebell:"Kettlebell",sztanga:"Sztanga z obciążeniem",rack:"Stojak do przysiadów",lawka:"Ławka treningowa",drazek:"Drążek do podciągania",porecze:"Poręcze do dipów",tasmy:"Gumy oporowe z uchwytami",miniband:"Mini band (guma na nogi)",trx:"Taśmy TRX",kolko:"Kółko do brzucha",skakanka:"Skakanka",rower:"Rower stacjonarny",biezna:"Bieżnia",orbitrek:"Orbitrek",wioslarz:"Wioślarz"};
+// alternatywy: wystarczy spełnić jeden zestaw; [] = bez sprzętu
+const EQREQ={"Masa ciała":[[]],"Masa ciała + krzesło":[[]],"Masa ciała + stół":[[]],"Masa ciała + ręcznik":[[]],"Masa ciała / talerz":[[]],"Ławka / krzesło":[[]],"Ławka / GHD":[[]],"Maszyna sissy / masa ciała":[[]],
+ "Hantle":[["hantle"]],"Hantle + ławka":[["hantle","lawka"]],"Hantle / kettlebell":[["hantle"],["kettlebell"]],"Hantle + skrzynia":[["hantle"]],"Kettlebell":[["kettlebell"]],
+ "Sztanga":[["sztanga"]],"Sztanga łamana":[["sztanga"]],"Sztanga + ławka":[["sztanga","lawka"]],"Sztanga łamana + ławka":[["sztanga","lawka"]],"Sztanga + klatka (rack)":[["sztanga","rack"]],
+ "Talerz obciążeniowy":[["sztanga"],["hantle"],["kettlebell"]],"Ławka skośna":[["lawka"]],
+ "Drążek":[["drazek"]],"Poręcze (dip)":[["porecze"]],"Poręcze / kapitański fotel":[["porecze"]],"TRX":[["trx"]],"Guma mini band":[["miniband"]],"Gumy oporowe z uchwytami":[["tasmy"]],"Kółko do brzucha":[["kolko"]],
+ "Skakanka":[["skakanka"]],"Bieżnia":[["biezna"]],"Rower stacjonarny":[["rower"]],"Orbitrek":[["orbitrek"]],"Wioślarz":[["wioslarz"]]};
+EX.forEach(e=>e.home=EQREQ[e.eq]||null);
+const isHome=()=>S.place==="dom";
+function canDo(e,equip){if(!e.home)return false;const have=new Set(equip||S.equip||[]);return e.home.some(alt=>alt.every(x=>have.has(x)));}
+const HOME_ONLY_EQ=new Set(["Masa ciała + krzesło","Masa ciała + stół","Masa ciała + ręcznik","Gumy oporowe z uchwytami"]);
+const HOME_ONLY_N=new Set(["Pompki na kolanach","Przysiad bez obciążenia","Wykroki w miejscu","Wspięcia na palce na schodku","Pajacyki i skip A (obwód)","Hip thrust z hantlem na kanapie","Krzesełko przy ścianie (wall sit)","Y-T-W leżąc na brzuchu"]);
+const avail=e=>isHome()?canDo(e):!(HOME_ONLY_EQ.has(e.eq)||HOME_ONLY_N.has(e.n));
 const TYPE = {c:"Wielostawowe",i:"Izolowane",k:"Cardio"};
 
 /* ===================== STAN ===================== */
 const KEY="posturajsie.v1";
-const DEFAULTS=()=>({v:3,sex:null,age:null,weight:null,height:null,goal:null,focus:[],level:1,days:3,plan:false,swaps:{},chat:[],log:[],diet:{days:{},custom:[],recent:[]},eat:"wszystko",tab:null,savedAt:null,createdAt:null});
+const DEFAULTS=()=>({v:3,sex:null,age:null,weight:null,height:null,goal:null,focus:[],level:1,days:3,plan:false,swaps:{},chat:[],log:[],diet:{days:{},custom:[],recent:[]},eat:"wszystko",tab:null,place:"silownia",equip:[],savedAt:null,createdAt:null});
 let S=DEFAULTS(), STORAGE_OK=true, RETURNING=false;
 try{const raw=localStorage.getItem(KEY); if(raw){S=Object.assign(S,JSON.parse(raw));RETURNING=!!S.savedAt;}}catch(e){STORAGE_OK=false}
 if(!Array.isArray(S.log))S.log=[];if(!Array.isArray(S.chat))S.chat=[];if(!Array.isArray(S.focus))S.focus=[];
@@ -807,6 +883,14 @@ function renderProfile(){
   $("#btn-plan").disabled=!ready;
   $("#plan-hint").hidden=!!ready;
 }
+function renderPlace(){
+  if(!Array.isArray(S.equip))S.equip=[];
+  $$("#seg-place button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===(S.place||"silownia"))));
+  $("#equip-wrap").hidden=!isHome();
+  $("#equip-chips").innerHTML=Object.entries(HOME_EQ).map(([k,v])=>`<button type="button" class="chip" data-eqk="${k}" aria-pressed="${S.equip.includes(k)}">${v}</button>`).join("");
+  const n=EX.filter(e=>canDo(e)).length;
+  $("#equip-count").textContent=`Z tym sprzętem możesz zrobić ${n} ćwiczeń z bazy.`;
+}
 function bindProfile(){
   const map={"#in-age":"age","#in-weight":"weight","#in-height":"height"};
   for(const [sel,k] of Object.entries(map)){
@@ -820,6 +904,9 @@ function bindProfile(){
     else{S.focus=S.focus.filter(x=>x!=="cale");S.focus=S.focus.includes(f)?S.focus.filter(x=>x!==f):[...S.focus,f];}
     save();renderProfile();});
   $("#sel-level").addEventListener("change",e=>{S.level=+e.target.value;S.swaps={};save();renderProfile();});
+  $("#seg-place").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.place=b.dataset.v;S.swaps={};save();renderPlace();renderLib();});
+  $("#equip-chips").addEventListener("click",e=>{const b=e.target.closest("[data-eqk]");if(!b)return;const k=b.dataset.eqk;S.equip=S.equip||[];S.equip=S.equip.includes(k)?S.equip.filter(x=>x!==k):[...S.equip,k];S.swaps={};save();renderPlace();renderLib();});
+  renderPlace();
   $("#sel-days").addEventListener("change",e=>{S.days=+e.target.value;S.swaps={};save();renderProfile();});
   $("#btn-plan").addEventListener("click",()=>{S.plan=true;S.swaps={};save();location.hash="plan";route();});
 }
@@ -844,16 +931,25 @@ const isLower=k=>/LO_|LEGS|FBW/.test(k), isUpper=k=>/UP_|PUSH|PULL|FBW/.test(k);
 
 function hash(n){n=((n>>>16)^n)*0x45d9f3b;n=((n>>>16)^n)*0x45d9f3b;return ((n>>>16)^n)>>>0}
 function pick(muscle,type,used,seed){
-  let pool=EX.filter(e=>e.m===muscle&&e.t===type&&e.lvl<=S.level&&!used.has(e.id));
-  if(!pool.length) pool=EX.filter(e=>e.m===muscle&&e.lvl<=S.level&&!used.has(e.id));
-  if(!pool.length) pool=EX.filter(e=>e.m===muscle&&!used.has(e.id));
-  if(!pool.length) pool=EX.filter(e=>e.m===muscle);
-  // początkujący: maszyny na start
-  if(S.level===1){const mach=pool.filter(e=>/maszyn|Suwnica|Wyciąg|Brama|Hack|Butterfly|Chest|Shoulder|Hammer/i.test(e.eq));if(mach.length>=2&&seed%3!==0)pool=mach;}
+  const A=EX.filter(avail);
+  let pool=A.filter(e=>e.m===muscle&&e.t===type&&e.lvl<=S.level&&!used.has(e.id));
+  if(!pool.length) pool=A.filter(e=>e.m===muscle&&e.lvl<=S.level&&!used.has(e.id));
+  if(!pool.length) pool=A.filter(e=>e.m===muscle&&!used.has(e.id));
+  if(!pool.length) return null;
+  // w domu: przy sprzęcie z obciążeniem preferuj ćwiczenia z obciążeniem
+  if(isHome()){const loaded=pool.filter(e=>!/^Masa ciała|^Ławka \/ krzesło/.test(e.eq));if(loaded.length>=1&&seed%3!==0&&S.goal!=="schudnac")pool=loaded;}
+  // początkujący na siłowni: maszyny na start
+  if(!isHome()&&S.level===1){const mach=pool.filter(e=>/maszyn|Suwnica|Wyciąg|Brama|Hack|Butterfly|Chest|Shoulder|Hammer/i.test(e.eq));if(mach.length>=2&&seed%3!==0)pool=mach;}
   return pool[seed%pool.length];
 }
 function dose(e){
   const g=S.goal;
+  const bw=/^Masa ciała|^Gumy|^Guma|^Ławka \/ krzesło|^TRX/.test(e.eq);
+  if(e.t!=="k"&&/wall sit|Deska|Hollow/.test(e.n)) return {sr:"3 × 30–60 s",rest:"45 s"};
+  if(bw&&e.t!=="k"){
+    if(g==="schudnac") return {sr:"3 × 15–20",rest:"30–45 s"};
+    return e.t==="c"?{sr:(S.level>1?"4":"3")+" × 12–20",rest:"60–90 s"}:{sr:"3 × 15–25",rest:"45 s"};
+  }
   if(e.t==="k") return g==="schudnac"?{sr:"15–20 min",rest:"–"}:{sr:"10 min",rest:"–"};
   if(e.m==="brzuch"&&/Deska|Hollow/.test(e.n)) return {sr:"3 × 30–45 s",rest:"45 s"};
   if(g==="schudnac") return e.t==="c"?{sr:"3 × 10–12",rest:"60 s"}:{sr:"3 × 12–15",rest:"45 s"};
@@ -878,8 +974,9 @@ function buildPlan(){
     const items=slots.map((sl,si)=>{
       const [m,t]=sl.split(":");const k=`${di}-${si}`;
       const e=pick(m,t,used,hash(di*31+si*7+S.level)+(S.swaps[k]||0));
+      if(!e)return null;
       used.add(e.id);return {e,k,...dose(e)};
-    });
+    }).filter(Boolean);
     return {name:T[key].n,day:DAYNAMES[S.days][di],items};
   });
 }
@@ -900,13 +997,14 @@ function renderPlan(){
   }[S.goal];
   v.innerHTML=`
   <div class="intro"><span class="label">Mój plan · ${esc(gName)}${focusTxt?" · nacisk: "+esc(focusTxt):""}</span><h2>Twój tydzień treningowy</h2>
-  <p class="muted">${S.days} ${S.days<5?"treningi":"treningów"} w tygodniu, poziom: ${LVL[S.level].toLowerCase()}. Kliknij nazwę ćwiczenia, aby zobaczyć technikę, albo „Zamień”, jeśli maszyna jest zajęta.</p></div>
+  <p class="muted">${isHome()?"Trening w domu":"Trening na siłowni"}, ${S.days} ${S.days<5?"treningi":"treningów"} w tygodniu, poziom: ${LVL[S.level].toLowerCase()}. ${isHome()?`Sprzęt: ${(S.equip||[]).length?(S.equip||[]).map(k=>HOME_EQ[k]).join(", ").toLowerCase():"bez sprzętu (wystarczy krzesło, stół i ręcznik)"}. `:""}Kliknij nazwę ćwiczenia, aby zobaczyć technikę, albo „Zamień”, ${isHome()?"żeby dostać inne ćwiczenie":"jeśli maszyna jest zajęta"}.</p></div>
   <div class="plan-summary">
     <div class="card"><span class="label">Kalorie / dzień</span><div class="mono" style="font-size:26px;font-weight:700">${r.kcal??"–"}</div><span class="muted" style="font-size:12.5px">${kcalNote}</span></div>
     <div class="card"><span class="label">Białko</span><div class="mono" style="font-size:26px;font-weight:700">${r.prot??"–"} g</div><span class="muted" style="font-size:12.5px">rozłóż na 3–5 posiłków</span></div>
     <div class="card"><span class="label">BMI</span><div class="mono" style="font-size:26px;font-weight:700">${fmt(r.bmi)}</div><span style="font-size:12.5px;font-weight:700;color:${r.cat.c}">${r.cat.name}</span></div>
     <div class="card"><span class="label">Zapotrzebowanie (TDEE)</span><div class="mono" style="font-size:26px;font-weight:700">${r.tdee?Math.round(r.tdee):"–"}</div><span class="muted" style="font-size:12.5px">kcal przy tej aktywności</span></div>
   </div>
+  ${isHome()&&!(S.equip||[]).some(k=>["hantle","kettlebell","sztanga","tasmy"].includes(k))&&S.goal!=="schudnac"?`<div class="callout">Bez obciążenia mięśnie też rosną, ale progres zrobisz głównie przez więcej powtórzeń, wolniejsze tempo i trudniejsze warianty. Para regulowanych hantli albo zestaw gum oporowych bardzo przyspieszy efekty.</div>`:""}
   <div class="callout">${esc(tips)}${S.focus.includes("brzuch")?" Uwaga: nie da się spalić tłuszczu tylko z brzucha. Ćwiczenia wzmocnią mięśnie, a widoczność brzucha zależy od deficytu kalorycznego.":""}</div>
   ${plan.map((d,di)=>`
   <div class="card day">
@@ -930,24 +1028,26 @@ function initLib(){
   $("#lib-eq").insertAdjacentHTML("beforeend",eqs.map(e=>`<option>${esc(e)}</option>`).join(""));
   $("#lib-muscles").innerHTML=`<button class="chip" data-m="" aria-pressed="true">Wszystkie</button>`+Object.entries(MUSCLES).map(([k,v])=>`<button class="chip" data-m="${k}" aria-pressed="false">${v}</button>`).join("");
   $("#lib-muscles").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;libMuscle=b.dataset.m;$$("#lib-muscles .chip").forEach(c=>c.setAttribute("aria-pressed",String(c===b)));renderLib();});
-  ["#lib-q","#lib-eq","#lib-lvl"].forEach(s=>$(s).addEventListener("input",renderLib));
+  if(isHome())$("#lib-place").value="dom";
+  ["#lib-q","#lib-eq","#lib-lvl","#lib-place"].forEach(s=>$(s).addEventListener("input",renderLib));
   renderLib();
 }
 const lvlBars=l=>`<span class="lvl" title="${LVL[l]}" aria-label="Poziom: ${LVL[l]}">${[1,2,3].map(i=>`<i class="${i<=l?"on":""}"></i>`).join("")}</span>`;
 function renderLib(){
   const q=norm($("#lib-q").value.trim()), eq=$("#lib-eq").value, lv=$("#lib-lvl").value;
-  const list=EX.filter(e=>(!libMuscle||e.m===libMuscle||e.s.includes(libMuscle))&&(!eq||e.eq===eq)&&(!lv||e.lvl==lv)&&(!q||norm(e.n+" "+e.eq+" "+MUSCLES[e.m]+" "+e.s.map(x=>MUSCLES[x]).join(" ")).includes(q)));
+  const pl=$("#lib-place").value;
+  const list=EX.filter(e=>(!pl||(pl==="dom"?canDo(e):canDo(e,[])))).filter(e=>(!libMuscle||e.m===libMuscle||e.s.includes(libMuscle))&&(!eq||e.eq===eq)&&(!lv||e.lvl==lv)&&(!q||norm(e.n+" "+e.eq+" "+MUSCLES[e.m]+" "+e.s.map(x=>MUSCLES[x]).join(" ")).includes(q)));
   $("#lib-count").textContent=`${list.length} z ${EX.length} ćwiczeń`;
   $("#lib-grid").innerHTML=list.length?list.map(e=>`
     <button class="ex-card" data-ex="${e.id}">
       <b>${esc(e.n)}</b>
       <span class="muted" style="font-size:13px">${esc(e.eq)}</span>
-      <div class="tags"><span class="tag-s">${MUSCLES[e.m]}</span><span class="tag-s">${TYPE[e.t]}</span>${lvlBars(e.lvl)}</div>
+      <div class="tags"><span class="tag-s">${MUSCLES[e.m]}</span><span class="tag-s">${TYPE[e.t]}</span>${e.home?`<span class="tag-s home">${canDo(e,[])?"bez sprzętu":"w domu"}</span>`:""}${lvlBars(e.lvl)}</div>
     </button>`).join(""):`<p class="muted">Nic nie pasuje do filtrów. Spróbuj innej nazwy lub wyczyść filtry.</p>`;
 }
 function openEx(id){
   const e=EX[id];
-  const alts=EX.filter(x=>x.m===e.m&&x.id!==e.id&&x.t===e.t).slice(0,4);
+  const alts=EX.filter(x=>x.m===e.m&&x.id!==e.id&&x.t===e.t&&avail(x)).slice(0,4);
   $("#modal").innerHTML=`
     <span class="label">${MUSCLES[e.m]} · ${TYPE[e.t]}</span>
     <h3 id="m-title">${esc(e.n)}</h3>
@@ -975,7 +1075,7 @@ function profileText(){
   const r=calc();const g={schudnac:"schudnąć",przytyc:"przybrać na wadze",miesnie:"zwiększyć masę mięśniową"}[S.goal]||"nie wybrano";
   let t=`Płeć: ${S.sex==="K"?"kobieta":S.sex==="M"?"mężczyzna":"?"}, wiek: ${S.age??"?"}, waga: ${S.weight??"?"} kg, wzrost: ${S.height??"?"} cm.`;
   if(r)t+=` BMI ${fmt(r.bmi)} (${r.cat.name}). Kalorie docelowe: ${r.kcal??"?"} kcal, białko ${r.prot??"?"} g.`;
-  t+=` Cel: ${g}. Poziom: ${LVL[S.level]}. Treningi: ${S.days}/tydz. Sposób odżywiania: ${(EAT[S.eat]||EAT.wszystko).n} (${(EAT[S.eat]||EAT.wszystko).d}) – proponując jedzenie, ściśle tego przestrzegaj.`;
+  t+=` Cel: ${g}. Poziom: ${LVL[S.level]}. Treningi: ${S.days}/tydz. Miejsce: ${isHome()?"dom, sprzęt: "+((S.equip||[]).map(k=>HOME_EQ[k]).join(", ")||"brak (tylko masa ciała, krzesło, stół, ręcznik)")+" – proponuj wyłącznie ćwiczenia możliwe z tym sprzętem":"siłownia"}. Sposób odżywiania: ${(EAT[S.eat]||EAT.wszystko).n} (${(EAT[S.eat]||EAT.wszystko).d}) – proponując jedzenie, ściśle tego przestrzegaj.`;
   if(S.focus.length)t+=` Skupienie: ${S.focus.map(f=>FOCUS[f]).join(", ")}.`;
   if(S.log.length)t+="\nOstatnie aktywności z dziennika:\n"+S.log.slice(0,8).map(x=>`${x.date}: ${x.name}, ${x.min} min${x.kcal!=null?", "+Math.round(x.kcal)+" kcal":""}${x.speed?", "+x.speed+" km/h":""}${x.hr?", tętno "+x.hr:""}`).join("\n");
   try{const T=targets(),d=dayTotals(today()),x=peekDay(today());t+=`\nDieta dziś: zjedzone ${Math.round(d.kcal)} z ${T.kcal} kcal (B ${Math.round(d.p)}/${T.p} g, T ${Math.round(d.f)}/${T.f} g, W ${Math.round(d.c)}/${T.c} g), woda ${x?x.water:0}/${T.water} ml.`;
@@ -998,6 +1098,7 @@ function localAnswer(q){
   if(has("wod","nawodn","pic","pij")){const T=targets(),x=peekDay(today());return `Twój cel to ok. **${(T.water/1000).toLocaleString("pl-PL")} l** wody dziennie (35 ml na kg masy ciała). Dziś masz zapisane **${((x?x.water:0)/1000).toLocaleString("pl-PL")} l**. W dni treningowe dodaj 0,5 l. Wodę dodasz w zakładce Moja dieta.`;}
   if(has("przepis","co zjesc","co zjem","pomysl na","obiad","kolacj","sniadani")){const T=targets(),left=T.kcal-dayTotals(today()).kcal;const pool=RECIPES.filter(recipeOK).filter(r=>!(S.goal==="schudnac"&&r.tags.includes("na masę"))&&r.t.kcal<=Math.max(250,left+50)).sort((a,b)=>b.t.p/b.t.kcal-a.t.p/a.t.kcal).slice(0,4);return `Zostało Ci dziś ok. **${Math.round(Math.max(0,left))} kcal**. Propozycje:\n`+pool.map(r=>`- ${r.n}: ${Math.round(r.t.kcal)} kcal, ${Math.round(r.t.p)} g białka`).join("\n")+"\nPełne przepisy znajdziesz w zakładce Moja dieta → Przepisy.";}
   if(has("zjadl","zjadlem","zjadlam","bilans","makro")){const T=targets(),d=dayTotals(today());return `Dziś: **${Math.round(d.kcal)} / ${T.kcal} kcal**. Białko ${Math.round(d.p)}/${T.p} g, tłuszcze ${Math.round(d.f)}/${T.f} g, węglowodany ${Math.round(d.c)}/${T.c} g.`;}
+  if(has("w domu","bez sprzetu","domow")){const L=EX.filter(e=>isHome()?canDo(e):canDo(e,[])).filter(e=>e.t!=="k");const by=m=>L.filter(e=>e.m===m).slice(0,2).map(e=>e.n).join(", ");return `Trening w domu ${isHome()&&(S.equip||[]).length?"z Twoim sprzętem":"bez sprzętu"}:\n- Nogi: ${by("czworoglowe")}\n- Pośladki: ${by("posladki")}\n- Klatka: ${by("klatka")}\n- Plecy: ${by("plecy")||"wiosłowanie pod stołem"}\n- Brzuch: ${by("brzuch")}\nUstaw „W domu” w Profilu, a cały plan dopasuje się do Twojego sprzętu.`;}
   if(has("bmi")) return r?`Twoje BMI to **${fmt(r.bmi)}** – ${r.cat.name.toLowerCase()}. Zdrowy zakres wagi dla Twojego wzrostu to ${Math.round(r.lo)}–${Math.round(r.hi)} kg. Pamiętaj, że BMI nie odróżnia mięśni od tłuszczu.`:"Uzupełnij wagę i wzrost w zakładce Profil, a policzę BMI.";
   if(has("kalor","kcal","jesc","jedz","diet")) return r&&r.kcal?`Przy Twoim celu celuj w ok. **${r.kcal} kcal** dziennie i **${r.prot} g białka**. Resztę kalorii podziel między węglowodany (głównie wokół treningu) a tłuszcze (min. 0,8 g/kg masy ciała). Po 2 tygodniach sprawdź wagę i skoryguj o 100–200 kcal.`:"Podaj płeć, wiek, wagę, wzrost i cel w Profilu, a wyliczę kalorie.";
   if(has("bialk","protein")) return `Celuj w 1,6–2,2 g białka na kg masy ciała${r&&r.prot?`, u Ciebie to ok. **${r.prot} g**`:""}. Dobre źródła: ${({wszystko:"kurczak, indyk, chuda wołowina, ryby, jaja, twaróg, skyr, odżywka białkowa",pesco:"ryby, krewetki, jaja, twaróg, skyr, tofu, strączki, odżywka białkowa",wege:"jaja, twaróg, skyr, serek wiejski, tofu, tempeh, soczewica, ciecierzyca, odżywka białkowa",wegan:"tofu, tempeh, edamame, soczewica, ciecierzyca, fasola, napój sojowy, białko roślinne"})[S.eat]||"kurczak, jaja, twaróg, skyr, tofu"}.`;
@@ -1071,6 +1172,7 @@ const ACT=[
   {id:"silowy",n:"Trening siłowy",met:5.0},
   {id:"spacer",n:"Spacer na zewnątrz",dist:1},
   {id:"bieg_out",n:"Bieg na zewnątrz",dist:1},
+  {id:"dom",n:"Trening w domu",met:5.0},
   {id:"inne",n:"Inna aktywność",met:4.5}
 ];
 const actById=id=>ACT.find(a=>a.id===id)||ACT[ACT.length-1];
