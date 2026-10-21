@@ -291,6 +291,9 @@ section.view{display:grid;gap:22px}
 .rec-k{font-size:15px;font-weight:700}
 .rec-k small{display:block;font-weight:500;color:var(--muted);font-size:12px;margin-top:2px}
 .tag-s.home{background:color-mix(in srgb,var(--plate-blue) 16%,transparent);color:var(--ink)}
+.where{display:inline-block;padding:1px 7px;border-radius:4px;font-size:10.5px;letter-spacing:.06em;margin-left:2px}
+.where.dom{background:color-mix(in srgb,var(--plate-blue) 18%,transparent);color:var(--ink)}
+.where.silownia{background:var(--accent-soft);color:var(--ink)}
 .tag-s.fit{background:var(--accent-soft);color:var(--ink)}
 .cust{display:grid;gap:12px}
 .eat-opts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
@@ -418,10 +421,12 @@ footer{max-width:1100px;margin:0 auto;padding-block:0 40px;font-size:12.5px;colo
 
   <div class="card" style="display:grid;gap:14px">
     <div><span class="label">Miejsce treningu</span><h3 style="margin-top:4px">Gdzie trenujesz?</h3></div>
-    <div class="seg" role="group" aria-label="Miejsce treningu" id="seg-place" style="max-width:420px">
+    <div class="seg" role="group" aria-label="Miejsce treningu" id="seg-place" style="max-width:520px">
       <button type="button" data-v="silownia" aria-pressed="true">Na siłowni</button>
       <button type="button" data-v="dom" aria-pressed="false">W domu</button>
+      <button type="button" data-v="oba" aria-pressed="false">Tu i tu</button>
     </div>
+    <div class="field" id="homedays-wrap" hidden style="max-width:420px"><label for="sel-homedays">Ile treningów w tygodniu robisz w domu?</label><select id="sel-homedays"></select><span class="src" id="homedays-hint"></span></div>
     <div id="equip-wrap" hidden style="display:grid;gap:10px">
       <p class="muted" style="font-size:14px">Zaznacz sprzęt, który masz w domu. Plan i baza ćwiczeń dopasują się do niego. Bez żadnego sprzętu też ułożymy trening: wystarczy krzesło, stół i ręcznik.</p>
       <div class="chips" id="equip-chips"></div>
@@ -800,7 +805,11 @@ const EQREQ={"Masa ciała":[[]],"Masa ciała + krzesło":[[]],"Masa ciała + st�
  "Drążek":[["drazek"]],"Poręcze (dip)":[["porecze"]],"Poręcze / kapitański fotel":[["porecze"]],"TRX":[["trx"]],"Guma mini band":[["miniband"]],"Gumy oporowe z uchwytami":[["tasmy"]],"Kółko do brzucha":[["kolko"]],
  "Skakanka":[["skakanka"]],"Bieżnia":[["biezna"]],"Rower stacjonarny":[["rower"]],"Orbitrek":[["orbitrek"]],"Wioślarz":[["wioslarz"]]};
 EX.forEach(e=>e.home=EQREQ[e.eq]||null);
-const isHome=()=>S.place==="dom";
+let PLACE_CTX=null; // miejsce dla aktualnie budowanego dnia planu
+const isHome=()=>(PLACE_CTX||S.place)==="dom";
+const usesHome=()=>S.place==="dom"||S.place==="oba";
+const homeDaysN=()=>S.place==="dom"?S.days:S.place==="oba"?Math.min(Math.max(1,S.homeDays||1),S.days-1):0;
+const dayPlace=di=>S.place==="oba"?(di>=S.days-homeDaysN()?"dom":"silownia"):(S.place||"silownia");
 function canDo(e,equip){if(!e.home)return false;const have=new Set(equip||S.equip||[]);return e.home.some(alt=>alt.every(x=>have.has(x)));}
 const HOME_ONLY_EQ=new Set(["Masa ciała + krzesło","Masa ciała + stół","Masa ciała + ręcznik","Gumy oporowe z uchwytami"]);
 const HOME_ONLY_N=new Set(["Pompki na kolanach","Przysiad bez obciążenia","Wykroki w miejscu","Wspięcia na palce na schodku","Pajacyki i skip A (obwód)","Hip thrust z hantlem na kanapie","Krzesełko przy ścianie (wall sit)","Y-T-W leżąc na brzuchu"]);
@@ -809,7 +818,7 @@ const TYPE = {c:"Wielostawowe",i:"Izolowane",k:"Cardio"};
 
 /* ===================== STAN ===================== */
 const KEY="posturajsie.v1";
-const DEFAULTS=()=>({v:3,sex:null,age:null,weight:null,height:null,goal:null,focus:[],level:1,days:3,plan:false,swaps:{},chat:[],log:[],diet:{days:{},custom:[],recent:[]},eat:"wszystko",tab:null,place:"silownia",equip:[],savedAt:null,createdAt:null});
+const DEFAULTS=()=>({v:3,sex:null,age:null,weight:null,height:null,goal:null,focus:[],level:1,days:3,plan:false,swaps:{},chat:[],log:[],diet:{days:{},custom:[],recent:[]},eat:"wszystko",tab:null,place:"silownia",equip:[],homeDays:1,savedAt:null,createdAt:null});
 let S=DEFAULTS(), STORAGE_OK=true, RETURNING=false;
 try{const raw=localStorage.getItem(KEY); if(raw){S=Object.assign(S,JSON.parse(raw));RETURNING=!!S.savedAt;}}catch(e){STORAGE_OK=false}
 if(!Array.isArray(S.log))S.log=[];if(!Array.isArray(S.chat))S.chat=[];if(!Array.isArray(S.focus))S.focus=[];
@@ -886,7 +895,11 @@ function renderProfile(){
 function renderPlace(){
   if(!Array.isArray(S.equip))S.equip=[];
   $$("#seg-place button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.v===(S.place||"silownia"))));
-  $("#equip-wrap").hidden=!isHome();
+  $("#equip-wrap").hidden=!usesHome();
+  $("#homedays-wrap").hidden=S.place!=="oba";
+  if(S.place==="oba"){const max=Math.max(1,S.days-1);S.homeDays=homeDaysN();
+    $("#sel-homedays").innerHTML=[...Array(max)].map((_,i)=>`<option value="${i+1}" ${S.homeDays===i+1?"selected":""}>${i+1} z ${S.days}</option>`).join("");
+    $("#homedays-hint").textContent=`Pozostałe ${S.days-S.homeDays} ${S.days-S.homeDays===1?"trening":"treningi"} na siłowni. Liczbę wszystkich treningów zmienisz niżej.`;}
   $("#equip-chips").innerHTML=Object.entries(HOME_EQ).map(([k,v])=>`<button type="button" class="chip" data-eqk="${k}" aria-pressed="${S.equip.includes(k)}">${v}</button>`).join("");
   const n=EX.filter(e=>canDo(e)).length;
   $("#equip-count").textContent=`Z tym sprzętem możesz zrobić ${n} ćwiczeń z bazy.`;
@@ -904,10 +917,11 @@ function bindProfile(){
     else{S.focus=S.focus.filter(x=>x!=="cale");S.focus=S.focus.includes(f)?S.focus.filter(x=>x!==f):[...S.focus,f];}
     save();renderProfile();});
   $("#sel-level").addEventListener("change",e=>{S.level=+e.target.value;S.swaps={};save();renderProfile();});
+  $("#sel-homedays").addEventListener("change",e=>{S.homeDays=+e.target.value;S.swaps={};save();renderPlace();});
   $("#seg-place").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.place=b.dataset.v;S.swaps={};save();renderPlace();renderLib();});
   $("#equip-chips").addEventListener("click",e=>{const b=e.target.closest("[data-eqk]");if(!b)return;const k=b.dataset.eqk;S.equip=S.equip||[];S.equip=S.equip.includes(k)?S.equip.filter(x=>x!==k):[...S.equip,k];S.swaps={};save();renderPlace();renderLib();});
   renderPlace();
-  $("#sel-days").addEventListener("change",e=>{S.days=+e.target.value;S.swaps={};save();renderProfile();});
+  $("#sel-days").addEventListener("change",e=>{S.days=+e.target.value;S.swaps={};save();renderProfile();renderPlace();});
   $("#btn-plan").addEventListener("click",()=>{S.plan=true;S.swaps={};save();location.hash="plan";route();});
 }
 
@@ -937,7 +951,7 @@ function pick(muscle,type,used,seed){
   if(!pool.length) pool=A.filter(e=>e.m===muscle&&!used.has(e.id));
   if(!pool.length) return null;
   // w domu: przy sprzęcie z obciążeniem preferuj ćwiczenia z obciążeniem
-  if(isHome()){const loaded=pool.filter(e=>!/^Masa ciała|^Ławka \/ krzesło/.test(e.eq));if(loaded.length>=1&&seed%3!==0&&S.goal!=="schudnac")pool=loaded;}
+  if(isHome()){const loaded=pool.filter(e=>!/^Masa ciała|^Ławka \/ krzesło/.test(e.eq));if(loaded.length>=1&&S.goal!=="schudnac")pool=loaded;}
   // początkujący na siłowni: maszyny na start
   if(!isHome()&&S.level===1){const mach=pool.filter(e=>/maszyn|Suwnica|Wyciąg|Brama|Hack|Butterfly|Chest|Shoulder|Hammer/i.test(e.eq));if(mach.length>=2&&seed%3!==0)pool=mach;}
   return pool[seed%pool.length];
@@ -958,7 +972,8 @@ function dose(e){
 }
 function buildPlan(){
   const split=SPLITS[S.days]||SPLITS[3];
-  return split.map((key,di)=>{
+  const out=split.map((key,di)=>{
+    PLACE_CTX=dayPlace(di);
     let slots=[...T[key].s];
     // dodatki pod skupienie (kobiety)
     for(const f of S.focus){
@@ -977,8 +992,9 @@ function buildPlan(){
       if(!e)return null;
       used.add(e.id);return {e,k,...dose(e)};
     }).filter(Boolean);
-    return {name:T[key].n,day:DAYNAMES[S.days][di],items};
+    return {name:T[key].n,day:DAYNAMES[S.days][di],items,place:PLACE_CTX};
   });
+  PLACE_CTX=null;return out;
 }
 function renderPlan(){
   const v=$("#v-plan");
@@ -997,18 +1013,18 @@ function renderPlan(){
   }[S.goal];
   v.innerHTML=`
   <div class="intro"><span class="label">Mój plan · ${esc(gName)}${focusTxt?" · nacisk: "+esc(focusTxt):""}</span><h2>Twój tydzień treningowy</h2>
-  <p class="muted">${isHome()?"Trening w domu":"Trening na siłowni"}, ${S.days} ${S.days<5?"treningi":"treningów"} w tygodniu, poziom: ${LVL[S.level].toLowerCase()}. ${isHome()?`Sprzęt: ${(S.equip||[]).length?(S.equip||[]).map(k=>HOME_EQ[k]).join(", ").toLowerCase():"bez sprzętu (wystarczy krzesło, stół i ręcznik)"}. `:""}Kliknij nazwę ćwiczenia, aby zobaczyć technikę, albo „Zamień”, ${isHome()?"żeby dostać inne ćwiczenie":"jeśli maszyna jest zajęta"}.</p></div>
+  <p class="muted">${S.place==="oba"?`Siłownia i dom: ${S.days-homeDaysN()} na siłowni, ${homeDaysN()} w domu`:isHome()?"Trening w domu":"Trening na siłowni"}, ${S.days} ${S.days<5?"treningi":"treningów"} w tygodniu, poziom: ${LVL[S.level].toLowerCase()}. ${usesHome()?`Sprzęt w domu: ${(S.equip||[]).length?(S.equip||[]).map(k=>HOME_EQ[k]).join(", ").toLowerCase():"bez sprzętu (wystarczy krzesło, stół i ręcznik)"}. `:""}Kliknij nazwę ćwiczenia, aby zobaczyć technikę, albo „Zamień”, żeby dostać inne ćwiczenie.</p></div>
   <div class="plan-summary">
     <div class="card"><span class="label">Kalorie / dzień</span><div class="mono" style="font-size:26px;font-weight:700">${r.kcal??"–"}</div><span class="muted" style="font-size:12.5px">${kcalNote}</span></div>
     <div class="card"><span class="label">Białko</span><div class="mono" style="font-size:26px;font-weight:700">${r.prot??"–"} g</div><span class="muted" style="font-size:12.5px">rozłóż na 3–5 posiłków</span></div>
     <div class="card"><span class="label">BMI</span><div class="mono" style="font-size:26px;font-weight:700">${fmt(r.bmi)}</div><span style="font-size:12.5px;font-weight:700;color:${r.cat.c}">${r.cat.name}</span></div>
     <div class="card"><span class="label">Zapotrzebowanie (TDEE)</span><div class="mono" style="font-size:26px;font-weight:700">${r.tdee?Math.round(r.tdee):"–"}</div><span class="muted" style="font-size:12.5px">kcal przy tej aktywności</span></div>
   </div>
-  ${isHome()&&!(S.equip||[]).some(k=>["hantle","kettlebell","sztanga","tasmy"].includes(k))&&S.goal!=="schudnac"?`<div class="callout">Bez obciążenia mięśnie też rosną, ale progres zrobisz głównie przez więcej powtórzeń, wolniejsze tempo i trudniejsze warianty. Para regulowanych hantli albo zestaw gum oporowych bardzo przyspieszy efekty.</div>`:""}
+  ${usesHome()&&!(S.equip||[]).some(k=>["hantle","kettlebell","sztanga","tasmy"].includes(k))&&S.goal!=="schudnac"?`<div class="callout">Bez obciążenia mięśnie też rosną, ale progres zrobisz głównie przez więcej powtórzeń, wolniejsze tempo i trudniejsze warianty. Para regulowanych hantli albo zestaw gum oporowych bardzo przyspieszy efekty.</div>`:""}
   <div class="callout">${esc(tips)}${S.focus.includes("brzuch")?" Uwaga: nie da się spalić tłuszczu tylko z brzucha. Ćwiczenia wzmocnią mięśnie, a widoczność brzucha zależy od deficytu kalorycznego.":""}</div>
   ${plan.map((d,di)=>`
   <div class="card day">
-    <div class="day-head"><div><span class="label">${d.day}</span><h3>${esc(d.name)}</h3></div><span class="tag">${d.items.length} ćwiczeń · rozgrzewka 5–10 min</span></div>
+    <div class="day-head"><div><span class="label">${d.day}${S.place==="oba"?` · <span class="where ${d.place}">${d.place==="dom"?"w domu":"siłownia"}</span>`:""}</span><h3>${esc(d.name)}</h3></div><span class="tag">${d.items.length} ćwiczeń · rozgrzewka 5–10 min</span></div>
     ${d.items.map((it,i)=>`
     <div class="ex-row">
       <span class="num">${String(i+1).padStart(2,"0")}</span>
@@ -1028,7 +1044,7 @@ function initLib(){
   $("#lib-eq").insertAdjacentHTML("beforeend",eqs.map(e=>`<option>${esc(e)}</option>`).join(""));
   $("#lib-muscles").innerHTML=`<button class="chip" data-m="" aria-pressed="true">Wszystkie</button>`+Object.entries(MUSCLES).map(([k,v])=>`<button class="chip" data-m="${k}" aria-pressed="false">${v}</button>`).join("");
   $("#lib-muscles").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;libMuscle=b.dataset.m;$$("#lib-muscles .chip").forEach(c=>c.setAttribute("aria-pressed",String(c===b)));renderLib();});
-  if(isHome())$("#lib-place").value="dom";
+  if(S.place==="dom")$("#lib-place").value="dom";
   ["#lib-q","#lib-eq","#lib-lvl","#lib-place"].forEach(s=>$(s).addEventListener("input",renderLib));
   renderLib();
 }
@@ -1075,7 +1091,7 @@ function profileText(){
   const r=calc();const g={schudnac:"schudnąć",przytyc:"przybrać na wadze",miesnie:"zwiększyć masę mięśniową"}[S.goal]||"nie wybrano";
   let t=`Płeć: ${S.sex==="K"?"kobieta":S.sex==="M"?"mężczyzna":"?"}, wiek: ${S.age??"?"}, waga: ${S.weight??"?"} kg, wzrost: ${S.height??"?"} cm.`;
   if(r)t+=` BMI ${fmt(r.bmi)} (${r.cat.name}). Kalorie docelowe: ${r.kcal??"?"} kcal, białko ${r.prot??"?"} g.`;
-  t+=` Cel: ${g}. Poziom: ${LVL[S.level]}. Treningi: ${S.days}/tydz. Miejsce: ${isHome()?"dom, sprzęt: "+((S.equip||[]).map(k=>HOME_EQ[k]).join(", ")||"brak (tylko masa ciała, krzesło, stół, ręcznik)")+" – proponuj wyłącznie ćwiczenia możliwe z tym sprzętem":"siłownia"}. Sposób odżywiania: ${(EAT[S.eat]||EAT.wszystko).n} (${(EAT[S.eat]||EAT.wszystko).d}) – proponując jedzenie, ściśle tego przestrzegaj.`;
+  t+=` Cel: ${g}. Poziom: ${LVL[S.level]}. Treningi: ${S.days}/tydz. Miejsce: ${S.place==="oba"?`siłownia (${S.days-homeDaysN()}×/tydz.) i dom (${homeDaysN()}×/tydz.), sprzęt w domu: `+((S.equip||[]).map(k=>HOME_EQ[k]).join(", ")||"brak")+" – na treningi domowe proponuj tylko ćwiczenia możliwe z tym sprzętem":isHome()?"dom, sprzęt: "+((S.equip||[]).map(k=>HOME_EQ[k]).join(", ")||"brak (tylko masa ciała, krzesło, stół, ręcznik)")+" – proponuj wyłącznie ćwiczenia możliwe z tym sprzętem":"siłownia"}. Sposób odżywiania: ${(EAT[S.eat]||EAT.wszystko).n} (${(EAT[S.eat]||EAT.wszystko).d}) – proponując jedzenie, ściśle tego przestrzegaj.`;
   if(S.focus.length)t+=` Skupienie: ${S.focus.map(f=>FOCUS[f]).join(", ")}.`;
   if(S.log.length)t+="\nOstatnie aktywności z dziennika:\n"+S.log.slice(0,8).map(x=>`${x.date}: ${x.name}, ${x.min} min${x.kcal!=null?", "+Math.round(x.kcal)+" kcal":""}${x.speed?", "+x.speed+" km/h":""}${x.hr?", tętno "+x.hr:""}`).join("\n");
   try{const T=targets(),d=dayTotals(today()),x=peekDay(today());t+=`\nDieta dziś: zjedzone ${Math.round(d.kcal)} z ${T.kcal} kcal (B ${Math.round(d.p)}/${T.p} g, T ${Math.round(d.f)}/${T.f} g, W ${Math.round(d.c)}/${T.c} g), woda ${x?x.water:0}/${T.water} ml.`;
@@ -1098,7 +1114,7 @@ function localAnswer(q){
   if(has("wod","nawodn","pic","pij")){const T=targets(),x=peekDay(today());return `Twój cel to ok. **${(T.water/1000).toLocaleString("pl-PL")} l** wody dziennie (35 ml na kg masy ciała). Dziś masz zapisane **${((x?x.water:0)/1000).toLocaleString("pl-PL")} l**. W dni treningowe dodaj 0,5 l. Wodę dodasz w zakładce Moja dieta.`;}
   if(has("przepis","co zjesc","co zjem","pomysl na","obiad","kolacj","sniadani")){const T=targets(),left=T.kcal-dayTotals(today()).kcal;const pool=RECIPES.filter(recipeOK).filter(r=>!(S.goal==="schudnac"&&r.tags.includes("na masę"))&&r.t.kcal<=Math.max(250,left+50)).sort((a,b)=>b.t.p/b.t.kcal-a.t.p/a.t.kcal).slice(0,4);return `Zostało Ci dziś ok. **${Math.round(Math.max(0,left))} kcal**. Propozycje:\n`+pool.map(r=>`- ${r.n}: ${Math.round(r.t.kcal)} kcal, ${Math.round(r.t.p)} g białka`).join("\n")+"\nPełne przepisy znajdziesz w zakładce Moja dieta → Przepisy.";}
   if(has("zjadl","zjadlem","zjadlam","bilans","makro")){const T=targets(),d=dayTotals(today());return `Dziś: **${Math.round(d.kcal)} / ${T.kcal} kcal**. Białko ${Math.round(d.p)}/${T.p} g, tłuszcze ${Math.round(d.f)}/${T.f} g, węglowodany ${Math.round(d.c)}/${T.c} g.`;}
-  if(has("w domu","bez sprzetu","domow")){const L=EX.filter(e=>isHome()?canDo(e):canDo(e,[])).filter(e=>e.t!=="k");const by=m=>L.filter(e=>e.m===m).slice(0,2).map(e=>e.n).join(", ");return `Trening w domu ${isHome()&&(S.equip||[]).length?"z Twoim sprzętem":"bez sprzętu"}:\n- Nogi: ${by("czworoglowe")}\n- Pośladki: ${by("posladki")}\n- Klatka: ${by("klatka")}\n- Plecy: ${by("plecy")||"wiosłowanie pod stołem"}\n- Brzuch: ${by("brzuch")}\nUstaw „W domu” w Profilu, a cały plan dopasuje się do Twojego sprzętu.`;}
+  if(has("w domu","bez sprzetu","domow")){const L=EX.filter(e=>usesHome()?canDo(e):canDo(e,[])).filter(e=>e.t!=="k");const by=m=>L.filter(e=>e.m===m).slice(0,2).map(e=>e.n).join(", ");return `Trening w domu ${usesHome()&&(S.equip||[]).length?"z Twoim sprzętem":"bez sprzętu"}:\n- Nogi: ${by("czworoglowe")}\n- Pośladki: ${by("posladki")}\n- Klatka: ${by("klatka")}\n- Plecy: ${by("plecy")||"wiosłowanie pod stołem"}\n- Brzuch: ${by("brzuch")}\nUstaw „W domu” w Profilu, a cały plan dopasuje się do Twojego sprzętu.`;}
   if(has("bmi")) return r?`Twoje BMI to **${fmt(r.bmi)}** – ${r.cat.name.toLowerCase()}. Zdrowy zakres wagi dla Twojego wzrostu to ${Math.round(r.lo)}–${Math.round(r.hi)} kg. Pamiętaj, że BMI nie odróżnia mięśni od tłuszczu.`:"Uzupełnij wagę i wzrost w zakładce Profil, a policzę BMI.";
   if(has("kalor","kcal","jesc","jedz","diet")) return r&&r.kcal?`Przy Twoim celu celuj w ok. **${r.kcal} kcal** dziennie i **${r.prot} g białka**. Resztę kalorii podziel między węglowodany (głównie wokół treningu) a tłuszcze (min. 0,8 g/kg masy ciała). Po 2 tygodniach sprawdź wagę i skoryguj o 100–200 kcal.`:"Podaj płeć, wiek, wagę, wzrost i cel w Profilu, a wyliczę kalorie.";
   if(has("bialk","protein")) return `Celuj w 1,6–2,2 g białka na kg masy ciała${r&&r.prot?`, u Ciebie to ok. **${r.prot} g**`:""}. Dobre źródła: ${({wszystko:"kurczak, indyk, chuda wołowina, ryby, jaja, twaróg, skyr, odżywka białkowa",pesco:"ryby, krewetki, jaja, twaróg, skyr, tofu, strączki, odżywka białkowa",wege:"jaja, twaróg, skyr, serek wiejski, tofu, tempeh, soczewica, ciecierzyca, odżywka białkowa",wegan:"tofu, tempeh, edamame, soczewica, ciecierzyca, fasola, napój sojowy, białko roślinne"})[S.eat]||"kurczak, jaja, twaróg, skyr, tofu"}.`;

@@ -6,7 +6,7 @@ Trener personalny w kieszeni. Aplikacja webowa do treningu na siłowni, w język
 
 - **Profil i BMI**: wiek, waga, wzrost i płeć. BMI liczone na bieżąco wg skali WHO, zakres zdrowej wagi, BMR (Mifflin-St Jeor), zapotrzebowanie kaloryczne i białko.
 - **Cel**: schudnąć, przybrać na wadze albo zwiększyć mięśnie. Dla kobiet dodatkowo partie, na których plan się skupia (brzuch, uda, pośladki, ramiona, plecy).
-- **Siłownia albo dom**: przy treningu w domu zaznaczasz posiadany sprzęt (hantle, kettlebell, gumy, drążek, ławka, TRX, rower i inne), a plan i baza ćwiczeń pokazują tylko to, co da się z nim zrobić. Bez sprzętu też powstaje pełny plan.
+- **Siłownia, dom albo tu i tu**: przy opcji „Tu i tu” wybierasz, ile treningów w tygodniu robisz w domu, a plan oznacza każdy dzień jako siłownię albo dom. Przy treningu w domu zaznaczasz posiadany sprzęt (hantle, kettlebell, gumy, drążek, ławka, TRX, rower i inne), a plan i baza ćwiczeń pokazują tylko to, co da się z nim zrobić. Bez sprzętu też powstaje pełny plan.
 - **Plan tygodniowy**: 2–5 treningów, dopasowany do celu, poziomu i sprzętu. Każde ćwiczenie można zamienić na inne.
 - **Moja dieta**: dziennik żywienia w stylu Fitatu, czyli 5 posiłków dziennie, baza 136 produktów (w tym tofu, tempeh i inne roślinne źródła białka) z kaloriami i makroskładnikami, własne produkty, kopiowanie posiłku z poprzedniego dnia, licznik wody i nawigacja po dniach.
 - **Sposób odżywiania**: jem wszystko, bez mięsa (z rybami), wegetariańska albo wegańska. Wybór filtruje przepisy, produkty i podpowiedzi trenera.
